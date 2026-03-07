@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Target, Lightbulb, TrendingUp, Quote } from "lucide-react";
+import Image from "next/image";
 
 async function getProject(id: string) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects/${id}`, {
@@ -50,7 +51,7 @@ export default async function ProjectDetailPage({
       {project.image && (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="aspect-video rounded-2xl overflow-hidden bg-muted">
-            <img
+            <Image
               src={project.image}
               alt={project.title}
               className="w-full h-full object-cover"
@@ -113,7 +114,7 @@ export default async function ProjectDetailPage({
               <CardContent className="pt-8 pb-8">
                 <Quote className="h-8 w-8 text-primary/20 mb-4" />
                 <blockquote className="text-lg italic text-muted-foreground">
-                  "{project.testimonial}"
+                  &quot;{project.testimonial}&quot;
                 </blockquote>
               </CardContent>
             </Card>

@@ -55,7 +55,7 @@ export default function QuotePage() {
       } else {
         throw new Error("Failed to send quote request");
       }
-    } catch (error) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -94,7 +94,7 @@ export default function QuotePage() {
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button onClick={() => window.location.href = "/"}>
-                    Retour à l'accueil
+                    Retour à l&apos;accueil
                   </Button>
                   <Button variant="outline" onClick={() => setSubmitted(false)}>
                     Nouvelle demande

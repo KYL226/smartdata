@@ -64,11 +64,12 @@ export default function AdminAuthPage() {
         });
         router.push("/admin/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue";
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

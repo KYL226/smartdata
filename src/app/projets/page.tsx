@@ -1,6 +1,20 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+interface Project {
+  id: string;
+  title: string;
+  objective: string;
+  methodology?: string;
+  results?: string;
+  testimonial?: string | null;
+  image?: string | null;
+  published?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 async function getProjects() {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects`, {
@@ -24,7 +38,7 @@ export default async function ProjectsPage({
 
   const normalizedQuery = q.toLowerCase();
 
-  const filteredProjects = projects.filter((project: any) => {
+  const filteredProjects = projects.filter((project: Project) => {
     const matchesSearch =
       !normalizedQuery ||
       project.title?.toLowerCase().includes(normalizedQuery) ||
@@ -41,14 +55,14 @@ export default async function ProjectsPage({
   return (
     <>
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16">
+      <section className="bg-linear-to-br from-primary/10 via-background to-primary/5 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
               Nos Réalisations
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Découvrez nos projets d'analyse statistique et les résultats concrets que nous avons obtenus pour nos clients.
+              Découvrez nos projets d&apos;analyse statistique et les résultats concrets que nous avons obtenus pour nos clients.
             </p>
           </div>
 
@@ -70,7 +84,7 @@ export default async function ProjectsPage({
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">
-                Filtre d'article
+                Filtre d&apos;article
               </label>
               <select
                 name="type"
@@ -105,14 +119,16 @@ export default async function ProjectsPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map((project: any) => (
+              {filteredProjects.map((project: Project) => (
                 <Card key={project.id} className="overflow-hidden">
                   {project.image && (
-                    <div className="aspect-video bg-muted overflow-hidden">
-                      <img
+                    <div className="aspect-video bg-muted overflow-hidden relative">
+                      <Image
                         src={project.image}
                         alt={project.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     </div>
                   )}

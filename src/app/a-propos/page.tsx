@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, Target, Heart, Award, Users, Lightbulb } from "lucide-react";
 
@@ -36,7 +37,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16">
+      <section className="bg-linear-to-br from-primary/10 via-background to-primary/5 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-black">
@@ -75,11 +76,12 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src="/upload/imageP1.jpg"
+            <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src="/upload/imageP1.svg"
                 alt="Analyse de données"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           </div>
@@ -90,11 +92,12 @@ export default function AboutPage() {
       <section className="py-20 bg-muted/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src="/upload/imageP2.jpg"
+            <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src="/upload/imageP2.svg"
                 alt="Analyse de données"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
 
@@ -118,7 +121,7 @@ export default function AboutPage() {
                 <li className="flex items-start gap-3">
                   <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
                   <span>
-                    Offrant des services d'analyse statistique de haute qualite
+                    Offrant des services d&apos;analyse statistique de haute qualite
                   </span>
                 </li>
                 <li className="flex items-start gap-3">

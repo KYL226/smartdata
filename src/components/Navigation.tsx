@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const navigation = [
   { name: "Accueil", href: "/" },
@@ -23,7 +24,7 @@ export default function Navigation() {
         <div className="flex lg:flex-1 items-center">
           <Link href="/" className="flex items-center space-x-3">
             <div className="h-16 w-auto relative">
-              <img 
+              <Image 
                 src="/upload/logoSD-removebg-preview.png" 
                 alt="SmartData Logo" 
                 className="w-full h-full object-contain"

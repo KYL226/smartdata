@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
@@ -80,6 +80,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -111,8 +112,8 @@ export default function AdminDashboardPage() {
         const data = await response.json();
         setProjects(data);
       }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
     } finally {
       setIsLoading(false);
     }
@@ -120,20 +121,22 @@ export default function AdminDashboardPage() {
 
   const fetchContacts = async () => {
     try {
-      // For now, we don't have an API to fetch contacts, let's create one
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
+      // TODO: implémenter l'API /api/contacts
+      setContacts([]);
+    } catch (err) {
+      console.error("Error fetching contacts:", err);
+    } finally {
       setIsLoading(false);
     }
   };
 
   const fetchQuotes = async () => {
     try {
-      // For now, we don't have an API to fetch quotes, let's create one
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching quotes:", error);
+      // TODO: implémenter l'API /api/quotes
+      setQuotes([]);
+    } catch (err) {
+      console.error("Error fetching quotes:", err);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -161,11 +164,11 @@ export default function AdminDashboardPage() {
         resetForm();
         setIsEditing(false);
       }
-    } catch (error) {
+    } catch (err) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite",
+        description: err instanceof Error ? err.message : "Une erreur s'est produite",
       });
     }
   };
@@ -199,11 +202,11 @@ export default function AdminDashboardPage() {
         });
         fetchProjects();
       }
-    } catch (error) {
+    } catch (err) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite",
+        description: err instanceof Error ? err.message : "Une erreur s'est produite",
       });
     }
   };
@@ -262,12 +265,12 @@ export default function AdminDashboardPage() {
         title: "Image importée",
         description: "L'image a été enregistrée localement et liée au projet.",
       });
-    } catch (error: any) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Impossible de téléverser l'image",
+        description: err instanceof Error ? err.message : "Impossible de téléverser l'image",
       });
     } finally {
       setIsUploadingImage(false);
@@ -419,7 +422,7 @@ export default function AdminDashboardPage() {
                       <Switch
                         id="published"
                         checked={formData.published}
-                        onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
+                        onCheckedChange={(checked: boolean) => setFormData({ ...formData, published: checked })}
                       />
                       <Label htmlFor="published">Publié</Label>
                     </div>
@@ -481,7 +484,7 @@ export default function AdminDashboardPage() {
         {/* Contacts Tab */}
         {activeTab === "contacts" && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Messages de contact</h2>
+            <h2 className="text-xl font-semibold">Messages de contact ({contacts.length})</h2>
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 Cette fonctionnalité sera bientôt disponible
@@ -493,7 +496,7 @@ export default function AdminDashboardPage() {
         {/* Quotes Tab */}
         {activeTab === "quotes" && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Demandes de devis</h2>
+            <h2 className="text-xl font-semibold">Demandes de devis ({quotes.length})</h2>
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 Cette fonctionnalité sera bientôt disponible

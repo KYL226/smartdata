@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,11 +80,11 @@ export default function Home() {
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div className="space-y-6">
                 <h1 className="text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl">
-                  Prenez l'avantage avec<br />une vision claire de vos Données !
+                  Prenez l&apos;avantage avec<br />une vision claire de vos Données !
                 </h1>
                 <div className="mt-8 space-y-4">
                   <p className="text-lg text-primary-foreground/90">
-                    SmartData consulting vous accompagne dans l'analyse statistique de vos données pour optimiser votre stratégie et prendre des décisions basées sur des faits concrets.
+                    SmartData consulting vous accompagne dans l&apos;analyse statistique de vos données pour optimiser votre stratégie et prendre des décisions basées sur des faits concrets.
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-4 mt-10 sm:flex-row">
@@ -107,11 +108,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-                <img 
+              <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+                <Image
                   src="/upload/imageA1.jpg"
-                  alt="Analyse de données" 
-                  className="object-cover w-full h-full"
+                  alt="Analyse de données"
+                  fill
+                  className="object-cover"
                 />
               </div>
 
@@ -127,7 +129,7 @@ export default function Home() {
               Nos chiffres clés
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Découvrez l'impact de nos analyses à travers quelques chiffres
+              Découvrez l&apos;impact de nos analyses à travers quelques chiffres
             </p>
           </div>
 
@@ -158,7 +160,7 @@ export default function Home() {
                   <Award className="w-8 h-8 text-primary" />
                 </div>
                 <div className="mb-2 text-4xl font-bold text-primary">2+</div>
-                <p className="text-sm text-muted-foreground">Années d'expérience</p>
+                <p className="text-sm text-muted-foreground">Années d&apos;expérience</p>
               </CardContent>
             </Card>
 
@@ -181,10 +183,10 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl">
-                Une équipe d'experts à votre service
+                Une équipe d&apos;experts à votre service
               </h2>
               <p className="mb-6 text-lg text-muted-foreground">
-                Notre équipe est composée de statisticiens et data scientists expérimentés avec plus de 5 ans d'expérience. Nous mettons notre expertise au service de vos projets pour vous garantir des résultats fiables et pertinents.
+                Notre équipe est composée de statisticiens et data scientists expérimentés avec plus de 5 ans d&apos;expérience. Nous mettons notre expertise au service de vos projets pour vous garantir des résultats fiables et pertinents.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
@@ -206,11 +208,12 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="relative aspect-square lg:aspect-auto lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-              <img 
+            <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+              <Image
                 src="/upload/ImageA2.jpg"
-                alt="Analyse de données" 
-                className="object-cover w-full h-full"
+                alt="Analyse de données"
+                fill
+                className="object-cover"
               />
             </div>
             
@@ -226,7 +229,7 @@ export default function Home() {
             Prêt à exploiter la puissance de vos données ?
           </h2>
           <p className="mb-8 text-lg text-muted-foreground">
-            Contactez-nous des aujourd'hui pour discuter de votre projet et découvrir comment notre expertise statistique peut vous aider à atteindre vos objectifs.
+            Contactez-nous des aujourd&apos;hui pour discuter de votre projet et découvrir comment notre expertise statistique peut vous aider à atteindre vos objectifs.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button size="lg" className="text-white bg-secondary hover:bg-secondary/90">

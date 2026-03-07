@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, MessageCircle, Facebook, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
@@ -11,7 +12,7 @@ export default function Footer() {
             <div className="flex lg:flex-1 items-center">
               <Link href="/" className="flex items-center space-x-3">
                 <div className="h-16 w-auto relative">
-                  <img 
+                  <Image 
                     src="/upload/logoSD-removebg-preview.png" 
                     alt="SmartData Logo" 
                     className="w-full h-full object-contain"
@@ -20,7 +21,7 @@ export default function Footer() {
               </Link>
             </div>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Transformez vos données en décisions éclairées. SmartData vous accompagne dans l'analyse statistique pour optimiser votre stratégie.
+              Transformez vos données en décisions éclairées. SmartData vous accompagne dans l&apos;analyse statistique pour optimiser votre stratégie.
             </p>
             {/* Socials */}
             <div className="flex items-center gap-4 mt-4">
@@ -87,7 +88,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm text-muted-foreground">Abidjan, Côte d'Ivoire</span>
+                <span className="text-sm text-muted-foreground">Abidjan, Côte d&apos;Ivoire</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="h-5 w-5 text-primary shrink-0" />

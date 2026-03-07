@@ -44,7 +44,7 @@ export default function ContactPage() {
       } else {
         throw new Error("Failed to send message");
       }
-    } catch (error) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -90,7 +90,7 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold mb-1">Adresse</h3>
                         <p className="text-muted-foreground">
-                          Abidjan, Cote d'Ivoire
+                          Abidjan, Cote d&apos;Ivoire
                         </p>
                       </div>
                     </div>
