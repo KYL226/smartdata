@@ -5,9 +5,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Play, ArrowRight, CheckCircle2, Users, Award, TrendingUp, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const newsItems = [
+type NewsItem = {
+  id?: string;
+  title: string;
+  description: string;
+  published?: boolean;
+};
+
+const defaultNewsItems: NewsItem[] = [
   {
     title: "Ouverture de nouvelles sessions d'accompagnement mémoire / thèse",
     description:
@@ -28,6 +35,24 @@ const newsItems = [
 export default function Home() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [activeNewsIndex, setActiveNewsIndex] = useState<number | null>(null);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(defaultNewsItems);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch("/api/news");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setNewsItems(data);
+        }
+      } catch {
+        // en cas d'erreur, on garde les valeurs par défaut
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   return (
     <>
@@ -39,16 +64,18 @@ export default function Home() {
           </p>
           <div className="flex-1 overflow-hidden">
             <div className="flex gap-8 animate-marquee whitespace-nowrap">
-              {newsItems.map((news, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className="text-xs sm:text-sm hover:text-background/90 underline-offset-2 hover:underline"
-                  onClick={() => setActiveNewsIndex(index)}
-                >
-                  {news.title}
-                </button>
-              ))}
+              {newsItems
+                .filter((item) => item.published !== false)
+                .map((news, index) => (
+                  <button
+                    key={news.id ?? index}
+                    type="button"
+                    className="text-xs sm:text-sm hover:text-background/90 underline-offset-2 hover:underline"
+                    onClick={() => setActiveNewsIndex(index)}
+                  >
+                    {news.title}
+                  </button>
+                ))}
             </div>
           </div>
         </div>
