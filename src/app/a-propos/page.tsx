@@ -37,13 +37,13 @@ export default function AboutPage() {
   return (
     <>
       {/* Header */}
-      <section className="bg-linear-to-br from-primary/10 via-background to-primary/5 py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="py-16 bg-linear-to-br from-primary/10 via-background to-primary/5">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-black">
+            <h1 className="text-4xl font-bold tracking-tight text-black sm:text-5xl">
               A propos de SmartData consulting
             </h1>
-            <p className="mt-4 text-lg text-black max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto mt-4 text-lg text-black">
               Decouvrez notre histoire, notre mission et les valeurs qui guident
               notre engagement envers nos partenaires.
             </p>
@@ -53,16 +53,16 @@ export default function AboutPage() {
 
       {/* Vision */}
       <section className="py-20 bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                <Eye className="h-8 w-8 text-primary" />
+              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-primary/10">
+                <Eye className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-3xl font-bold tracking-tight mb-6">
+              <h2 className="mb-6 text-3xl font-bold tracking-tight">
                 Notre Vision
               </h2>
-              <p className="text-lg text-muted-foreground mb-4">
+              <p className="mb-4 text-lg text-muted-foreground">
                 Être le partenaire de référence en analyse statistique et data
                 science en Afrique de l’Ouest, en accompagnant les entreprises,
                 les institutions et les chercheurs dans la transformation de
@@ -76,9 +76,9 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative overflow-hidden shadow-2xl aspect-square lg:aspect-auto lg:h-125 rounded-2xl">
               <Image
-                src="/upload/imageP1.svg"
+                src="/upload/imageP1.jpg"
                 alt="Analyse de données"
                 fill
                 className="object-cover"
@@ -90,11 +90,11 @@ export default function AboutPage() {
 
       {/* Mission */}
       <section className="py-20 bg-muted/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square lg:aspect-auto lg:h-125 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="relative overflow-hidden shadow-2xl aspect-square lg:aspect-auto lg:h-125 rounded-2xl">
               <Image
-                src="/upload/imageP2.svg"
+                src="/upload/imageP2.jpg"
                 alt="Analyse de données"
                 fill
                 className="object-cover"
@@ -102,43 +102,43 @@ export default function AboutPage() {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                <Target className="h-8 w-8 text-primary" />
+              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-lg bg-primary/10">
+                <Target className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-3xl font-bold tracking-tight mb-6">
+              <h2 className="mb-6 text-3xl font-bold tracking-tight">
                 Notre Mission
               </h2>
-              <p className="text-lg text-muted-foreground mb-4">
+              <p className="mb-4 text-lg text-muted-foreground">
                 Accompagner nos clients dans la valorisation de leurs données en
                 combinant expertise analytique, formation et outils de data
                 science, afin de soutenir une prise de décision éclairée et le
                 développement des compétences en Afrique
               </p>
-              <p className="text-lg text-muted-foreground mb-4">
+              <p className="mb-4 text-lg text-muted-foreground">
                 Nous accomplissons cette mission en :
               </p>
               <ul className="space-y-3 text-lg text-muted-foreground">
                 <li className="flex items-start gap-3">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <div className="w-2 h-2 mt-2 rounded-full bg-primary shrink-0" />
                   <span>
                     Offrant des services d&apos;analyse statistique de haute qualite
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <div className="w-2 h-2 mt-2 rounded-full bg-primary shrink-0" />
                   <span>
                     La formation et le renforcement des capacités des équipes
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <div className="w-2 h-2 mt-2 rounded-full bg-primary shrink-0" />
                   <span>
                     La facilitation de l’accès aux outils, méthodes et
                     technologies de la data science
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <div className="w-2 h-2 mt-2 rounded-full bg-primary shrink-0" />
                   <span>
                     La contribution active au développement des compétences data
                     en Afrique
@@ -152,22 +152,22 @@ export default function AboutPage() {
 
       {/* Values */}
       <section className="py-20 bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Nos Valeurs
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto mt-4 text-lg text-muted-foreground">
               Les principes fondamentaux qui guident nos actions et nos
               décisions au quotidien.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid gap-8 md:grid-cols-2">
             {values.map((value, index) => (
               <Card
                 key={index}
-                className="transition-all hover:shadow-lg border"
+                className="transition-all border hover:shadow-lg"
               >
                 <CardContent className="pt-6">
                   <div
@@ -175,7 +175,7 @@ export default function AboutPage() {
                   >
                     <value.icon className={`h-7 w-7 ${value.color}`} />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
+                  <h3 className="mb-3 text-xl font-semibold">{value.title}</h3>
                   <p className="text-muted-foreground">{value.description}</p>
                 </CardContent>
               </Card>
@@ -186,11 +186,11 @@ export default function AboutPage() {
 
       {/* Team CTA */}
       <section className="py-20 bg-muted/50">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
+        <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl">
             Rejoignez notre equipe
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
+          <p className="mb-8 text-lg text-muted-foreground">
             Vous êtes passionnés par la data science et souhaitez contribuer à
             notre mission ? Contactez-nous pour découvrir les opportunités.
           </p>

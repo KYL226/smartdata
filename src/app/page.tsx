@@ -54,6 +54,8 @@ export default function Home() {
     fetchNews();
   }, []);
 
+  const displayedNews = newsItems.filter((item) => item.published !== false);
+
   return (
     <>
       {/* Flash News Bar */}
@@ -63,20 +65,20 @@ export default function Home() {
             Actualités
           </p>
           <div className="flex-1 overflow-hidden">
-            <div className="flex gap-8 animate-marquee whitespace-nowrap">
-              {newsItems
-                .filter((item) => item.published !== false)
-                .map((news, index) => (
+            {displayedNews.length > 0 && (
+              <div className="flex gap-8 animate-marquee whitespace-nowrap">
+                {[...displayedNews, ...displayedNews].map((news, index) => (
                   <button
-                    key={news.id ?? index}
+                    key={(news.id ?? "news") + "-" + index}
                     type="button"
                     className="text-xs sm:text-sm hover:text-background/90 underline-offset-2 hover:underline"
-                    onClick={() => setActiveNewsIndex(index)}
+                    onClick={() => setActiveNewsIndex(index % displayedNews.length)}
                   >
                     {news.title}
                   </button>
                 ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

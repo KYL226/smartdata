@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, BookOpen, Database, BarChart3, PieChart, GraduationCap } from "lucide-react";
 
@@ -9,7 +10,7 @@ const services = [
     description: "Beneficiez d'un accompagnement personnalise pour la redaction de vos memoires et these avec une methodologie statistique rigoureuse.",
     icon: BookOpen,
     color: "text-primary",
-    image: "/upload/imageT.svg",
+    image: "/upload/imageT.jpg",
   },
   {
     slug: "collecte-donnees-extraction-web",
@@ -17,7 +18,7 @@ const services = [
     description: "Nous collectons et structurons vos donnees a partir de multiples sources, y compris le web scraping, pour des analyses approfondies.",
     icon: Database,
     color: "text-primary",
-    image: "/upload/imageDonnee.svg",
+    image: "/upload/imageDonnee.jpg",
   },
   {
     slug: "etude-marche",
@@ -25,7 +26,7 @@ const services = [
     description: "Analysez votre marche, identifiez les opportunites et comprenez le comportement de vos clients grace a des methodes statistiques rigoureuses.",
     icon: BarChart3,
     color: "text-primary",
-    image: "/upload/imagemarché.svg",
+    image: "/upload/imagemarché.jpg",
   },
   {
     slug: "visualisation-donnees",
@@ -33,7 +34,7 @@ const services = [
     description: "Transformez des donnees complexes en visualisations claires et percutantes pour faciliter la comprehension et la prise de decision.",
     icon: PieChart,
     color: "text-primary",
-    image: "/upload/imagevisualisation.svg",
+    image: "/upload/imagevisualisation.jpg",
   },
   {
     slug: "formations-accompagnement",
@@ -41,7 +42,7 @@ const services = [
     description: "Formez vos equipes aux methodes statistiques et a l'analyse de donnees pour renforcer votre autonomie decisionnelle.",
     icon: GraduationCap,
     color: "text-primary",
-    image: "/upload/imageformation.svg",
+    image: "/upload/imageformation.jpg",
   },
 ];
 
@@ -49,23 +50,23 @@ export default function ServicesPage() {
   return (
     <>
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="py-16 bg-gradient-to-br from-primary/10 via-background to-primary/5">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
             <Link
               href="/"
               className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour a l'accueil
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour a l&apos;accueil
             </Link>
           </div>
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
               Nos Services
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Découvrez notre gamme complète de services d'analyse statistique adaptés à vos besoins spécifiques et à votre secteur d'activité.
+            <p className="max-w-2xl mx-auto mt-4 text-lg text-muted-foreground">
+              Découvrez notre gamme complète de services d&apos;analyse statistique adaptés à vos besoins spécifiques et à votre secteur d&apos;activité.
             </p>
           </div>
         </div>
@@ -73,28 +74,30 @@ export default function ServicesPage() {
 
       {/* Services Grid */}
       <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
                 className="group"
               >
-                <Card className="h-full overflow-hidden border transition-all hover:shadow-xl hover:border-primary/40">
+                <Card className="h-full overflow-hidden transition-all border hover:shadow-xl hover:border-primary/40">
                   <div className="relative h-40 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
-                    <img
+                    <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 to-transparent" />
+                    <Image
                       src={service.image}
                       alt={service.title}
-                      className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 transform group-hover:scale-110"
                     />
                   </div>
                   <CardHeader>
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-primary/10">
                       <service.icon className={`h-6 w-6 ${service.color}`} />
                     </div>
-                    <CardTitle className="group-hover:text-primary transition-colors">
+                    <CardTitle className="transition-colors group-hover:text-primary">
                       {service.title}
                     </CardTitle>
                     <CardDescription className="text-base">
@@ -102,9 +105,9 @@ export default function ServicesPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center text-secondary font-medium">
+                    <div className="flex items-center font-medium text-secondary">
                       <span>En savoir plus</span>
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -116,15 +119,15 @@ export default function ServicesPage() {
 
       {/* CTA Section */}
       <section className="py-16 bg-muted/50">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-            Besoin d'un service sur mesure ?
+        <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl">
+            Besoin d&apos;un service sur mesure ?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Contactez-nous pour discuter de vos besoins specifiques et obtenir un devis personnalise.
+          <p className="mb-8 text-lg text-muted-foreground">
+            Contactez-nous pour discuter de vos besoins spécifiques et obtenir un devis personnalisé.
           </p>
           <Link href="/devis">
-            <ArrowRight className="inline-block h-5 w-5 mb-2 text-secondary" />
+            <ArrowRight className="inline-block w-5 h-5 mb-2 text-secondary" />
             <p className="font-medium text-secondary">Demander un devis</p>
           </Link>
         </div>
