@@ -11,11 +11,12 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex lg:flex-1 items-center">
               <Link href="/" className="flex items-center space-x-3">
-                <div className="h-16 w-auto relative">
+                <div className="relative h-16 w-40">
                   <Image 
                     src="/upload/logoSD-removebg-preview.png" 
                     alt="SmartData Logo" 
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-contain"
                   />
                 </div>
               </Link>
