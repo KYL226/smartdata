@@ -20,14 +20,14 @@ function TikTokIcon({ className }: { className?: string }) {
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-background mt-auto">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="mt-auto border-t bg-background">
+      <div className="px-4 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand & Description */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex lg:flex-1 items-center">
+            <div className="flex items-center lg:flex-1">
               <Link href="/" className="flex items-center space-x-3">
-                <div className="relative h-16 w-40">
+                <div className="relative w-40 h-16">
                   <Image 
                     src="/upload/logoSD-removebg-preview.png" 
                     alt="SmartData Logo" 
@@ -37,7 +37,7 @@ export default function Footer() {
                 </div>
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mb-4 max-w-md">
+            <p className="max-w-md mb-4 text-sm text-muted-foreground">
               Transformez vos données en décisions éclairées. SmartData vous accompagne dans l&apos;analyse statistique pour optimiser votre stratégie.
             </p>
             {/* Socials */}
@@ -46,71 +46,71 @@ export default function Footer() {
                 href="https://www.facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="Facebook"
               >
-                <Facebook className="h-5 w-5" />
+                <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="https://www.instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="Instagram"
               >
-                <Instagram className="h-5 w-5" />
+                <Instagram className="w-5 h-5" />
               </a>
               <a
                 href="https://www.linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="LinkedIn"
               >
-                <Linkedin className="h-5 w-5" />
+                <Linkedin className="w-5 h-5" />
               </a>
               <a
                 href="https://www.youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="YouTube"
               >
-                <YoutubeIcon className="h-5 w-5" />
+                <YoutubeIcon className="w-5 h-5" />
               </a>
               <a
                 href="https://www.tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="TikTok"
               >
-                <TikTokIcon className="h-5 w-5" />
+                <TikTokIcon className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">Navigation</h3>
+            <h3 className="mb-4 font-semibold">Navigation</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/services" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   Services
                 </Link>
               </li>
               <li>
-                <Link href="/projets" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/projets" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   Projets
                 </Link>
               </li>
               <li>
-                <Link href="/a-propos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/a-propos" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   À propos
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/contact" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   Contact
                 </Link>
               </li>
@@ -119,19 +119,19 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-semibold mb-4">Contact</h3>
+            <h3 className="mb-4 font-semibold">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <span className="text-sm text-muted-foreground">Abidjan, Côte d&apos;Ivoire</span>
               </li>
               <li className="flex items-center space-x-2">
-                <Phone className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground">+225 07 01 46 88 21</span>
+                <Phone className="w-5 h-5 text-primary shrink-0" />
+                <span className="text-sm text-muted-foreground">+225 07 00 00 00 00</span>
               </li>
               <li className="flex items-center space-x-2">
-                <Mail className="h-5 w-5 text-primary shrink-0" />
-                <a href="mailto:contact@smartdata.ci" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Mail className="w-5 h-5 text-primary shrink-0" />
+                <a href="mailto:contact@smartdata.ci" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   smartdataconsulting@gmail.com
                 </a>
               </li>
@@ -141,17 +141,17 @@ export default function Footer() {
                 href="https://wa.me/2250000000000"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                className="inline-flex items-center space-x-2 text-sm font-medium text-green-600 transition-colors hover:text-green-700"
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="w-5 h-5" />
                 <span>WhatsApp</span>
               </a>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t">
-          <p className="text-center text-sm text-muted-foreground">
+        <div className="pt-8 mt-8 border-t">
+          <p className="text-sm text-center text-muted-foreground">
             © {new Date().getFullYear()} SmartData. Tous droits réservés.
           </p>
         </div>

@@ -1,22 +1,28 @@
+import type { ComponentType } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Database, BarChart3, PieChart, GraduationCap, Quote } from "lucide-react";
 
-const servicesData: Record<string, {
-  title: string;
-  icon: any;
-  color: string;
-  image: string;
-  fullDescription: string;
-  features: string[];
-  testimonial?: {
-    quote: string;
-    author: string;
-    role: string;
-  };
-}> = {
+type ServiceIcon = ComponentType<{ className?: string }>;
+
+const servicesData: Record<
+  string,
+  {
+    title: string;
+    icon: ServiceIcon;
+    color: string;
+    image: string;
+    fullDescription: string;
+    features: string[];
+    testimonial?: {
+      quote: string;
+      author: string;
+      role: string;
+    };
+  }
+> = {
   "accompagnement-redaction-memoire-these": {
     title: "Accompagnement à la rédaction de mémoire/thèse",
     icon: BookOpen,
@@ -128,9 +134,9 @@ export async function generateStaticParams() {
 export default async function ServiceDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
+  const { slug } = params;
   const service = servicesData[slug];
 
   if (!service) {
@@ -187,7 +193,7 @@ export default async function ServiceDetailPage({
               <CardContent className="pt-8 pb-8">
                 <Quote className="h-12 w-12 text-primary/20 mb-4" />
                 <blockquote className="text-xl italic text-muted-foreground mb-6">
-                  "{service.testimonial!.quote}"
+                  {service.testimonial!.quote}
                 </blockquote>
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
