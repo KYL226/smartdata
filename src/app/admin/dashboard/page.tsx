@@ -87,6 +87,7 @@ export default function AdminDashboardPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
 
   const [isNewsDialogOpen, setIsNewsDialogOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
@@ -308,7 +309,17 @@ export default function AdminDashboardPage() {
 
   const handleSubmitProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = isEditing ? `/api/projects/${editingProject?.id}` : "/api/projects";
+    const projectId = editingProject?.id;
+    if (isEditing && !projectId) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de modifier : projet introuvable (id manquant).",
+      });
+      return;
+    }
+
+    const url = isEditing ? `/api/projects/${projectId}` : "/api/projects";
     const method = isEditing ? "PUT" : "POST";
 
     try {
@@ -328,6 +339,7 @@ export default function AdminDashboardPage() {
         fetchProjects();
         resetForm();
         setIsEditing(false);
+        setIsProjectDialogOpen(false);
       }
     } catch (err) {
       toast({
@@ -350,6 +362,7 @@ export default function AdminDashboardPage() {
       published: project.published,
     });
     setIsEditing(true);
+    setIsProjectDialogOpen(true);
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -500,9 +513,20 @@ export default function AdminDashboardPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Gestion des projets</h2>
-              <Dialog>
+              <Dialog
+                open={isProjectDialogOpen}
+                onOpenChange={(open) => {
+                  setIsProjectDialogOpen(open);
+                  if (!open) resetForm();
+                }}
+              >
                 <DialogTrigger asChild>
-                  <Button onClick={resetForm}>
+                  <Button
+                    onClick={() => {
+                      resetForm();
+                      setIsProjectDialogOpen(true);
+                    }}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Nouveau projet
                   </Button>
@@ -602,7 +626,14 @@ export default function AdminDashboardPage() {
                       <Button type="submit" className="flex-1">
                         {isEditing ? "Modifier" : "Créer"}
                       </Button>
-                      <Button type="button" variant="outline" onClick={resetForm}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setIsProjectDialogOpen(false);
+                          resetForm();
+                        }}
+                      >
                         Annuler
                       </Button>
                     </div>
