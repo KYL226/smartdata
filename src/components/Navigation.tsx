@@ -18,12 +18,13 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
+    <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
+      <nav className="flex items-center justify-between p-4 mx-auto max-w-7xl lg:px-8">
 
-        <div className="flex lg:flex-1 items-center">
+        {/* LOGO */}
+        <div className="flex items-center lg:flex-1">
           <Link href="/" className="flex items-center space-x-3">
-            <div className="relative h-16 w-40">
+            <div className="relative w-40 h-16">
               <Image 
                 src="/upload/logoSD-removebg-preview.png" 
                 alt="SmartData Logo" 
@@ -34,82 +35,84 @@ export default function Navigation() {
           </Link>
         </div>
 
+        {/* BOUTON MOBILE */}
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
-            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 text-black"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <span className="sr-only">Ouvrir le menu</span>
-            <Menu className="h-6 w-6" aria-hidden="true" />
+            <Menu className="w-6 h-6" />
           </button>
         </div>
 
+        {/* MENU DESKTOP */}
         <div className="hidden lg:flex lg:gap-x-8">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm font-semibold leading-6 text-foreground hover:text-primary transition-colors"
+              className="text-sm font-semibold text-black transition hover:text-blue-600"
             >
               {item.name}
             </Link>
           ))}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <Button className="bg-secondary hover:bg-secondary/90" asChild>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          <Button className="text-white bg-blue-600 hover:bg-blue-700" asChild>
             <Link href="/devis">Demander un devis</Link>
           </Button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* MENU MOBILE */}
       {mobileMenuOpen && (
-        <div className="lg:hidden" role="dialog" aria-modal="true">
-          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-foreground/10">
+        <div className="lg:hidden">
+          
+          {/* OVERLAY */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* SIDEBAR */}
+          <div className="fixed top-0 right-0 z-50 w-full h-full max-w-sm p-6 transition-transform duration-300 bg-white shadow-lg">
+
+            {/* HEADER */}
             <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center space-x-3" onClick={() => setMobileMenuOpen(false)}>
-                <div className="flex items-center justify-center w-12 h-12 bg-background border-2 border-dashed border-muted rounded-lg">
-                  <span className="text-xs text-muted-foreground font-medium">LOGO</span>
-                </div>
-                <span className="font-bold text-xl">
-                  <span className="text-primary">Smart</span><span className="text-secondary">Data</span>
-                </span>
-              </Link>
-              <button
-                type="button"
-                className="-m-2.5 rounded-md p-2.5 text-foreground"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="sr-only">Fermer le menu</span>
-                <X className="h-6 w-6" aria-hidden="true" />
+              <span className="text-xl font-bold text-black">
+                Smart<span className="text-blue-600">Data</span>
+              </span>
+
+              <button onClick={() => setMobileMenuOpen(false)}>
+                <X className="w-6 h-6 text-black" />
               </button>
             </div>
-            <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-border">
-                <div className="space-y-2 py-6">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-accent"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-                <div className="py-6">
-                  <Button className="w-full bg-secondary hover:bg-secondary/90" asChild>
-                    <Link href="/devis" onClick={() => setMobileMenuOpen(false)}>
-                      Demander un devis
-                    </Link>
-                  </Button>
-                </div>
-              </div>
+
+            {/* LIENS */}
+            <div className="flex flex-col gap-3 mt-8">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="block px-4 py-3 font-semibold text-black rounded-lg hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
+
+            {/* BOUTON */}
+            <div className="mt-6">
+              <Button className="w-full text-white bg-blue-600 hover:bg-blue-700" asChild>
+                <Link href="/devis" onClick={() => setMobileMenuOpen(false)}>
+                  Demander un devis
+                </Link>
+              </Button>
+            </div>
+
           </div>
         </div>
       )}
