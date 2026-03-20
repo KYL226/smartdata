@@ -59,8 +59,8 @@ export default function Navigation() {
           ))}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Button className="text-white bg-blue-600 hover:bg-blue-700" asChild>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
+          <Button className="bg-secondary hover:bg-secondary/90" asChild>
             <Link href="/devis">Demander un devis</Link>
           </Button>
         </div>
@@ -82,7 +82,7 @@ export default function Navigation() {
             {/* HEADER */}
             <div className="flex items-center justify-between">
               <span className="text-xl font-bold text-black">
-                Smart<span className="text-blue-600">Data</span>
+                <span className="text-primary">Smart</span><span className="text-secondary">Data</span>
               </span>
 
               <button onClick={() => setMobileMenuOpen(false)}>
@@ -106,7 +106,7 @@ export default function Navigation() {
 
             {/* BOUTON */}
             <div className="mt-6">
-              <Button className="w-full text-white bg-blue-600 hover:bg-blue-700" asChild>
+              <Button className="w-full bg-secondary hover:bg-secondary/90" asChild>
                 <Link href="/devis" onClick={() => setMobileMenuOpen(false)}>
                   Demander un devis
                 </Link>

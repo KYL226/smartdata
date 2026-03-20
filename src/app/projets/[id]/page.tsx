@@ -6,9 +6,12 @@ import { ArrowLeft, Target, Lightbulb, TrendingUp, Quote } from "lucide-react";
 import Image from "next/image";
 
 async function getProject(id: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects/${id}`, {
-    cache: "no-store",
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
     return null;
@@ -32,13 +35,13 @@ export default async function ProjectDetailPage({
   return (
     <>
       {/* Header */}
-      <section className="bg-muted/30 py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="py-8 bg-muted/30">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <Link
             href="/projets"
-            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
+            className="inline-flex items-center mb-6 text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Retour aux projets
           </Link>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
@@ -49,12 +52,13 @@ export default async function ProjectDetailPage({
 
       {/* Project Image */}
       {project.image && (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="aspect-video rounded-2xl overflow-hidden bg-muted">
+        <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden aspect-video rounded-2xl bg-muted">
             <Image
               src={project.image}
               alt={project.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
         </div>
@@ -62,16 +66,16 @@ export default async function ProjectDetailPage({
 
       {/* Project Content */}
       <section className="py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
           {/* Objective */}
           <Card className="mb-8">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Target className="h-6 w-6 text-primary" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 shrink-0">
+                  <Target className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Objectif</h2>
+                  <h2 className="mb-2 text-xl font-semibold">Objectif</h2>
                   <p className="text-muted-foreground">{project.objective}</p>
                 </div>
               </div>
@@ -82,12 +86,14 @@ export default async function ProjectDetailPage({
           <Card className="mb-8">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Lightbulb className="h-6 w-6 text-primary" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 shrink-0">
+                  <Lightbulb className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Méthodologie</h2>
-                  <p className="text-muted-foreground whitespace-pre-line">{project.methodology}</p>
+                  <h2 className="mb-2 text-xl font-semibold">Méthodologie</h2>
+                  <p className="whitespace-pre-line text-muted-foreground">
+                    {project.methodology}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -97,12 +103,14 @@ export default async function ProjectDetailPage({
           <Card className="mb-8">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 shrink-0">
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Résultats</h2>
-                  <p className="text-muted-foreground whitespace-pre-line">{project.results}</p>
+                  <h2 className="mb-2 text-xl font-semibold">Résultats</h2>
+                  <p className="whitespace-pre-line text-muted-foreground">
+                    {project.results}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -112,7 +120,7 @@ export default async function ProjectDetailPage({
           {project.testimonial && (
             <Card className="mb-8 bg-primary/5">
               <CardContent className="pt-8 pb-8">
-                <Quote className="h-8 w-8 text-primary/20 mb-4" />
+                <Quote className="w-8 h-8 mb-4 text-primary/20" />
                 <blockquote className="text-lg italic text-muted-foreground">
                   &quot;{project.testimonial}&quot;
                 </blockquote>
@@ -124,17 +132,18 @@ export default async function ProjectDetailPage({
 
       {/* CTA */}
       <section className="py-16 bg-muted/30">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">
+        <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight">
             Vous avez un projet similaire ?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Contactez-nous pour discuter de votre projet et découvrir comment nous pouvons vous aider à atteindre vos objectifs.
+          <p className="mb-8 text-lg text-muted-foreground">
+            Contactez-nous pour discuter de votre projet et découvrir comment nous
+            pouvons vous aider à atteindre vos objectifs.
           </p>
           <Button size="lg" asChild>
             <Link href="/devis">
               Demander un devis
-              <ArrowLeft className="rotate-180 ml-2 h-5 w-5" />
+              <ArrowLeft className="w-5 h-5 ml-2 rotate-180" />
             </Link>
           </Button>
         </div>
