@@ -24,12 +24,12 @@ model User {
 
 model Project {
   id             String   @id @default(cuid())
-  title          String
-  objective      String
-  methodology    String
-  results        String
-  testimonial    String?
-  image          String
+  title          String   @db.VarChar(191)
+  objective      String   @db.Text
+  methodology    String   @db.Text
+  results        String   @db.Text
+  testimonial    String?  @db.Text
+  image          String   @db.VarChar(191)
   published      Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -37,31 +37,31 @@ model Project {
 
 model ContactMessage {
   id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  message   String
+  name      String   @db.VarChar(191)
+  email     String   @db.VarChar(191)
+  phone     String?  @db.VarChar(191)
+  message   String   @db.Text
   createdAt DateTime @default(now())
 }
 
 model QuoteRequest {
   id             String   @id @default(cuid())
-  firstName      String
-  lastName       String
-  email          String
-  phone          String
-  serviceType    String
-  description    String
-  attachment     String?
-  status         String   @default("pending")
+  firstName      String   @db.VarChar(191)
+  lastName       String   @db.VarChar(191)
+  email          String   @db.VarChar(191)
+  phone          String   @db.VarChar(191)
+  serviceType    String   @db.VarChar(191)
+  description    String   @db.Text
+  attachment     String?  @db.VarChar(191)
+  status         String   @default("pending") @db.VarChar(50)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model NewsItem {
   id          String   @id @default(cuid())
-  title       String
-  description String
+  title       String   @db.VarChar(191)
+  description String   @db.Text
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -30,11 +30,117 @@ export default function QuotePage() {
     attachment: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const allowedAttachmentTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ];
+  const maxAttachmentBytes = 10 * 1024 * 1024;
+
+  const handleAttachmentChange = async (file: File | null) => {
+    if (!file) {
+      setSelectedFile(null);
+      setFormData((prev) => ({ ...prev, attachment: "" }));
+      return;
+    }
+
+    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const allowedExtensions = ["pdf", "doc", "docx", "xls", "xlsx"];
+
+    if (
+      !allowedExtensions.includes(extension) &&
+      !allowedAttachmentTypes.includes(file.type)
+    ) {
+      toast({
+        variant: "destructive",
+        title: "Format non autorisé",
+        description: "Seuls les fichiers PDF, DOC, DOCX, XLS et XLSX sont acceptés.",
+      });
+      return;
+    }
+
+    if (file.size > maxAttachmentBytes) {
+      toast({
+        variant: "destructive",
+        title: "Fichier trop volumineux",
+        description: "La pièce jointe ne doit pas dépasser 10MB.",
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingAttachment(true);
+      setSelectedFile(file);
+      setFormData((prev) => ({ ...prev, attachment: "" }));
+
+      const fileData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Erreur de lecture du fichier"));
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            resolve(result.split(",")[1] ?? "");
+          } else {
+            reject(new Error("Format de fichier invalide"));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      const response = await fetch("/api/quote/attachment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileData }),
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error ?? "Échec du téléversement");
+      }
+
+      setFormData((prev) => ({ ...prev, attachment: data.url }));
+    } catch (error) {
+      setSelectedFile(null);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Impossible de joindre ce fichier",
+      });
+    } finally {
+      setIsUploadingAttachment(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isUploadingAttachment) {
+      toast({
+        variant: "destructive",
+        title: "Veuillez patienter",
+        description: "La pièce jointe est encore en cours de téléversement.",
+      });
+      return;
+    }
+
+    if (!formData.serviceType) {
+      toast({
+        variant: "destructive",
+        title: "Champ manquant",
+        description: "Veuillez sélectionner un type de service.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -53,13 +159,17 @@ export default function QuotePage() {
           description: "Nous vous répondrons dans les plus brefs délais.",
         });
       } else {
-        throw new Error("Failed to send quote request");
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? "Échec de l'envoi de la demande");
       }
-    } catch {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite. Veuillez réessayer.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Une erreur s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsSubmitting(false);
@@ -96,7 +206,22 @@ export default function QuotePage() {
                   <Button onClick={() => window.location.href = "/"}>
                     Retour à l&apos;accueil
                   </Button>
-                  <Button variant="outline" onClick={() => setSubmitted(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFormData({
+                        firstName: "",
+                        lastName: "",
+                        email: "",
+                        phone: "",
+                        serviceType: "",
+                        description: "",
+                        attachment: "",
+                      });
+                      setSelectedFile(null);
+                      setSubmitted(false);
+                    }}
+                  >
                     Nouvelle demande
                   </Button>
                 </div>
@@ -228,18 +353,19 @@ export default function QuotePage() {
 
                {/* Attachment (Optional) */}
                   <div>
-                    <Label htmlFor="attachment">Pièce jointe (facultatif)</Label>
+                    <p className="text-sm font-medium">Pièce jointe (facultatif)</p>
 
                     <div className="mt-2 flex justify-center">
                       <Label
                         htmlFor="attachment"
-                        className="cursor-pointer"
+                        className="cursor-pointer w-full max-w-xl"
                       >
-                        <div className="w-full max-w-xl border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-
+                        <div className="w-full border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
 
                           {/* Icône */}
-                          {selectedFile ? (
+                          {isUploadingAttachment ? (
+                            <Upload className="h-12 w-12 mx-auto animate-pulse text-primary mb-4" />
+                          ) : selectedFile && formData.attachment ? (
                             <CheckCircle2 className="h-12 w-12 mx-auto text-green-600 mb-4" />
                           ) : (
                             <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -247,9 +373,11 @@ export default function QuotePage() {
 
                           {/* Texte principal */}
                           <p className="text-sm text-muted-foreground mb-2">
-                            {selectedFile
-                              ? "Fichier sélectionné avec succès"
-                              : "Glissez-déposez un fichier ici ou cliquez pour sélectionner"}
+                            {isUploadingAttachment
+                              ? "Téléversement de la pièce jointe..."
+                              : selectedFile && formData.attachment
+                                ? "Pièce jointe ajoutée avec succès"
+                                : "Glissez-déposez un fichier ici ou cliquez pour sélectionner"}
                           </p>
 
                           {/* Nom du fichier */}
@@ -270,10 +398,12 @@ export default function QuotePage() {
                       id="attachment"
                       type="file"
                       className="hidden"
+                      disabled={isUploadingAttachment}
                       accept=".pdf,.doc,.docx,.xls,.xlsx"
                       onChange={(e) => {
                         const file = e.target.files?.[0] || null;
-                        setSelectedFile(file);
+                        void handleAttachmentChange(file);
+                        e.target.value = "";
                       }}
                     />
 
@@ -285,10 +415,14 @@ export default function QuotePage() {
 
 
 
-
                 {/* Submit */}
-                <Button type="submit" disabled={isSubmitting} size="lg" className="w-full bg-secondary hover:bg-secondary/90">
-                  {isSubmitting ? "Envoi en cours..." : (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || isUploadingAttachment}
+                  size="lg"
+                  className="w-full bg-secondary hover:bg-secondary/90"
+                >
+                  {isSubmitting || isUploadingAttachment ? "Envoi en cours..." : (
                     <>
                       Envoyer ma demande
                       <ArrowRight className="ml-2 h-5 w-5" />

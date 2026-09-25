@@ -2,30 +2,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { db } from "@/lib/db";
 
 interface Project {
   id: string;
   title: string;
   objective: string;
-  methodology?: string;
-  results?: string;
   testimonial?: string | null;
   image?: string | null;
   published?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-async function getProjects() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects`, {
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
+async function getProjects(): Promise<Project[]> {
+  try {
+    return await db.project.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 60,
+      select: {
+        id: true,
+        title: true,
+        objective: true,
+        testimonial: true,
+        image: true,
+        published: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching projects:", error);
     return [];
   }
-
-  return response.json();
 }
 
 export default async function ProjectsPage({

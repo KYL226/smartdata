@@ -1,12 +1,29 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth";
+import { projectSchema, validateBody } from "@/lib/validation";
 
-export async function GET() {
+const PUBLIC_PROJECT_SELECT = {
+  id: true,
+  title: true,
+  objective: true,
+  testimonial: true,
+  image: true,
+  published: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+export async function GET(request: Request) {
+  const includeUnpublished =
+    request.url.includes("all=1") && Boolean(requireAdmin(request));
+
   try {
     const projects = await db.project.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: includeUnpublished ? undefined : { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 60,
+      select: PUBLIC_PROJECT_SELECT,
     });
 
     return NextResponse.json(projects);
@@ -20,29 +37,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { title, objective, methodology, results, testimonial, image, published } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
+  }
 
-    if (!title || !objective || !methodology || !results || !image) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+  const parsed = validateBody(projectSchema, body);
+  if (!parsed.ok) return parsed.response;
 
-    const project = await db.project.create({
-      data: {
-        title,
-        objective,
-        methodology,
-        results,
-        testimonial: testimonial || null,
-        image,
-        published: published !== undefined ? published : true,
-      },
-    });
-
+  try {
+    const project = await db.project.create({ data: parsed.data });
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     console.error("Error creating project:", error);

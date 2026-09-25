@@ -13,8 +13,8 @@ export async function GET(request: Request) {
 
   try {
     const [total, items] = await Promise.all([
-      db.quoteRequest.count(),
-      db.quoteRequest.findMany({
+      db.project.count(),
+      db.project.findMany({
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -23,9 +23,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ items, total, page, pageSize });
   } catch (error) {
-    console.error("Error fetching quote requests:", error);
+    console.error("Error fetching admin projects:", error);
     return NextResponse.json(
-      { error: "Failed to fetch quote requests" },
+      { error: "Failed to fetch projects" },
       { status: 500 }
     );
   }

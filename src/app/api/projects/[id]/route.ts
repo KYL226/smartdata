@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth";
+import { projectUpdateSchema, validateBody } from "@/lib/validation";
 
 export async function GET(
   request: Request,
@@ -8,17 +10,15 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const project = await db.project.findUnique({
+    const project = await db.project.findFirst({
       where: {
         id,
+        ...(requireAdmin(request) ? {} : { published: true }),
       },
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     return NextResponse.json(project);
@@ -35,25 +35,27 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
-    const body = await request.json();
-    const { title, objective, methodology, results, testimonial, image, published } = body;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Corps de requête invalide" },
+        { status: 400 }
+      );
+    }
+
+    const parsed = validateBody(projectUpdateSchema, body);
+    if (!parsed.ok) return parsed.response;
 
     const project = await db.project.update({
-      where: {
-        id,
-      },
-      data: {
-        title,
-        objective,
-        methodology,
-        results,
-        testimonial: testimonial || null,
-        image,
-        published: published !== undefined ? published : true,
-      },
+      where: { id },
+      data: parsed.data,
     });
 
     return NextResponse.json(project);
@@ -70,14 +72,12 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
-    await db.project.delete({
-      where: {
-        id,
-      },
-    });
+    await db.project.delete({ where: { id } });
 
     return NextResponse.json({ message: "Project deleted successfully" });
   } catch (error) {

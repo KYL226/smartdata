@@ -39,6 +39,10 @@ DATABASE_URL="mysql://USER:MOT_DE_PASSE@HOST:3306/NOM_DE_LA_BASE"
 
 # Administration
 ADMIN_PASSWORD="admin123"
+# Secret de signature du cookie de session admin (HMAC-SHA256) - obligatoire
+SESSION_SECRET="une_chaine_aleatoire_de_64_caracteres_minimum"
+# Force le flag Secure du cookie (true/false). Auto-détecté via x-forwarded-proto sinon.
+# COOKIE_SECURE="true"
 
 # URL publique (pour liens absolus)
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
@@ -62,8 +66,12 @@ Créez une base MySQL vide, puis indiquez-la dans `DATABASE_URL`.
 ### 3. Migrer la base de données
 
 ```bash
+# base vierge / développement (crée une migration)
 npx prisma migrate dev
 npx prisma generate
+
+# environnement existant / production (applique les migrations en attente)
+npm run migrate:deploy
 ```
 
 ### 4. Démarrer le serveur
@@ -73,6 +81,17 @@ npm run dev
 ```
 
 Le site sera accessible à : **http://localhost:3000**
+
+### 5. Build de production
+
+```bash
+npm run migrate:deploy   # applique les migrations
+npm run build
+npm run start
+```
+
+> Si `next build` (Turbopack) échoue en mémoire sur une machine peu dotée, utilisez
+> `npx next build --webpack` — même résultat, bundler plus léger.
 
 ---
 
@@ -97,8 +116,14 @@ Le site sera accessible à : **http://localhost:3000**
 
 ### Authentification (`/admin`)
 
-- **Création de l'admin** : première visite → bouton « Créer un administrateur »
-- **Connexion** : cookie `admin_session` (valide 24h)
+- **Connexion** : mot de passe `ADMIN_PASSWORD` (aucune inscription — la route
+  `/api/admin/register` n'existe plus)
+- **Session** : cookie `admin_session`, **HttpOnly + SameSite=Strict**, signé
+  HMAC-SHA256 avec `SESSION_SECRET`, valable 24h
+- **Rate-limit** : 5 tentatives / 15 minutes par IP (HTTP 429 ensuite)
+- **Déconnexion** : `POST /api/admin/logout` (invalide le cookie)
+- **Protection** : layout serveur `/admin/dashboard` → redirection si session
+  absente ; toutes les routes `/api/admin/*` vérifient le cookie côté serveur
 
 ### Tableau de bord (`/admin/dashboard`)
 
@@ -112,8 +137,13 @@ Le site sera accessible à : **http://localhost:3000**
 ### Upload d'images (Cloudinary)
 
 - Images stockées sur **Cloudinary**, dossier `smartdata`
-- Via le formulaire projet : URL directe ou upload de fichier → API `/api/upload-image`
-- Les URLs renvoyées sont des URLs Cloudinary (`https://res.cloudinary.com/...`)
+- **Admin** : `POST /api/upload` (cookie requis) → `{ fileName, fileData, kind }`
+  avec `kind = "image" | "document"` ; `fileData` = base64 **sans** préfixe
+  `data:...;base64,`
+- **Public** : `POST /api/quote/attachment` (pièce jointe de devis, documents
+  uniquement, rate-limit 10/h)
+- Extensions limitées à une liste blanche, **SVG refusé**, 5 Mo (images) /
+  10 Mo (documents), contrôle avant décodage
 
 ---
 
@@ -128,22 +158,26 @@ Le site sera accessible à : **http://localhost:3000**
 | POST | `/api/contact` | Envoi d'un message de contact |
 | POST | `/api/quote` | Demande de devis |
 | GET | `/api/news` | Actualités publiées (flash news) |
-| POST | `/api/upload-image` | Upload d'image → Cloudinary |
+| POST | `/api/quote/attachment` | Pièce jointe d'un devis → Cloudinary |
 
-### Admin (cookie requis côté front)
+### Admin (cookie `admin_session` vérifié **côté serveur**)
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
-| POST | `/api/projects` | Créer un projet |
-| PUT | `/api/projects/[id]` | Modifier un projet |
-| DELETE | `/api/projects/[id]` | Supprimer un projet |
-| GET | `/api/admin/contacts` | Liste des messages de contact |
-| GET | `/api/admin/quotes` | Liste des demandes de devis |
+| POST | `/api/admin/login` | Connexion (rate-limit 5/15 min) |
+| POST | `/api/admin/logout` | Déconnexion |
+| GET | `/api/admin/projects` | Projets (paginés, tous statuts) |
+| GET | `/api/admin/contacts` | Messages de contact (paginés) |
+| GET | `/api/admin/quotes` | Demandes de devis (paginées) |
 | PATCH | `/api/admin/quotes/[id]` | Mettre à jour le statut d'un devis |
 | GET | `/api/admin/news` | Toutes les actualités (publiées et masquées) |
-| POST | `/api/news` | Créer une actualité |
-| PUT | `/api/news/[id]` | Modifier une actualité |
-| DELETE | `/api/news/[id]` | Supprimer une actualité |
+| POST | `/api/admin/projects` | Créer un projet |
+| PUT | `/api/admin/projects/[id]` | Modifier un projet |
+| DELETE | `/api/admin/projects/[id]` | Supprimer un projet |
+| POST | `/api/upload` | Upload image/document → Cloudinary |
+
+Les listes admin renvoient `{ items, total, page, pageSize }` et acceptent
+`?page=1&pageSize=20`.
 
 ---
 
@@ -159,11 +193,29 @@ Le site sera accessible à : **http://localhost:3000**
 ## Scripts npm
 
 ```bash
-npm run dev    # Serveur de développement
-npm run build  # Build de production
-npm run start  # Démarrer en production
-npm run lint   # Linter ESLint
+npm run dev             # Serveur de développement
+npm run build           # Build de production (prisma generate + next build)
+npm run start           # Démarrer en production
+npm run lint            # Linter ESLint
+npm run typecheck       # Vérification TypeScript (tsc --noEmit)
+npm run migrate:dev     # Créer/appliquer une migration en développement
+npm run migrate:deploy  # Appliquer les migrations (production)
 ```
+
+---
+
+## Sécurité
+
+- **Auth admin** : cookie signé HMAC-SHA256 (`SESSION_SECRET`), HttpOnly,
+  SameSite=Strict, Secure selon `x-forwarded-proto` / `COOKIE_SECURE`
+- **Validation** : toutes les écritures passent par des schémas **zod**
+  (`src/lib/validation.ts`)
+- **Rate-limiting** : login (5/15 min), contact & devis (10/h), upload (30/h)
+- **Headers HTTP** : CSP, X-Frame-Options DENY, nosniff, HSTS, Referrer-Policy,
+  Permissions-Policy (`next.config.ts`)
+- **Upload** : liste blanche d'extensions, SVG refusé, taille vérifiée avant
+  décodage, réservé à l'admin sauf pièce jointe de devis
+- **Base** : colonnes de texte longues en `TEXT` (fini la limite VARCHAR(191))
 
 ---
 

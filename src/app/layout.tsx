@@ -4,7 +4,10 @@ import { Toaster } from "@/components/ui/toaster";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "SmartData - Transformez vos données en décisions éclairées",
   description: "SmartData vous accompagne dans l'analyse statistique de vos données pour optimiser votre stratégie et prendre des décisions basées sur des faits concrets.",
   keywords: ["analyse statistique", "data analysis", "data science", "études de marché", "visualisation de données", "Côte d'Ivoire", "Bouaké"],
@@ -16,6 +19,9 @@ export const metadata: Metadata = {
     title: "SmartData - Transformez vos données en décisions éclairées",
     description: "Expertise en analyse statistique et data science",
     type: "website",
+    url: baseUrl,
+    siteName: "SmartData Consulting",
+    locale: "fr_CI",
   },
 };
 

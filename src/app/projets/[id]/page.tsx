@@ -4,20 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Target, Lightbulb, TrendingUp, Quote } from "lucide-react";
 import Image from "next/image";
+import { db } from "@/lib/db";
 
 async function getProject(id: string) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/projects/${id}`,
-    {
-      cache: "no-store",
-    }
-  );
-
-  if (!response.ok) {
+  try {
+    return await db.project.findFirst({
+      where: { id, published: true },
+    });
+  } catch (error) {
+    console.error("Error fetching project:", error);
     return null;
   }
-
-  return response.json();
 }
 
 export default async function ProjectDetailPage({

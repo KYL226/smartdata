@@ -42,13 +42,17 @@ export default function ContactPage() {
           message: "",
         });
       } else {
-        throw new Error("Failed to send message");
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? "Échec de l'envoi du message");
       }
-    } catch {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite. Veuillez réessayer.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Une erreur s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsSubmitting(false);
@@ -120,7 +124,7 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold mb-1">Email</h3>
                         <a
-                          href="mailto:contact@smartdata.ci"
+                          href="mailto:smartdataconsulting@gmail.com"
                           className="text-muted-foreground hover:text-primary transition-colors"
                         >
                           smartdataconsulting@gmail.com
@@ -139,7 +143,7 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold mb-1">WhatsApp</h3>
                         <a
-                          href="https://wa.me/2250000000000"
+                          href="https://wa.me/2250701468821"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-700 font-medium"

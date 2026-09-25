@@ -7,7 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,6 +34,8 @@ import {
   FileText,
   MessageSquare,
   Package,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Project {
@@ -75,19 +83,39 @@ interface NewsItem {
   updatedAt: string;
 }
 
+interface PageResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+type Tab = "projects" | "contacts" | "quotes" | "news";
+
+const TAB_ENDPOINT: Record<Tab, string> = {
+  projects: "/api/admin/projects",
+  contacts: "/api/admin/contacts",
+  quotes: "/api/admin/quotes",
+  news: "/api/admin/news",
+};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<"projects" | "contacts" | "quotes" | "news">("projects");
+  const [activeTab, setActiveTab] = useState<Tab>("projects");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshToken, setRefreshToken] = useState(0);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const [isNewsDialogOpen, setIsNewsDialogOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
@@ -107,165 +135,150 @@ export default function AdminDashboardPage() {
     published: true,
   });
 
+  const api = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const response = await fetch(input, init);
+    if (response.status === 401) {
+      router.replace("/admin");
+      throw new Error("Session expirée");
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(data?.error ?? `Erreur ${response.status}`);
+    }
+    return data;
+  };
+
+  const refresh = () => setRefreshToken((value) => value + 1);
+
   useEffect(() => {
-    checkAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let cancelled = false;
+
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `${TAB_ENDPOINT[activeTab]}?page=${page}&pageSize=${pageSize}`,
+          { cache: "no-store" }
+        );
+
+        if (response.status === 401) {
+          router.replace("/admin");
+          return;
+        }
+
+        const data = (await response.json().catch(() => null)) as
+          | (Partial<PageResponse<unknown>> & { error?: string })
+          | null;
+
+        if (!response.ok) {
+          throw new Error(data?.error ?? `Erreur ${response.status}`);
+        }
+        if (cancelled || !data) return;
+
+        setTotal(data.total ?? 0);
+        setPageSize(data.pageSize ?? pageSize);
+
+        const items = data.items ?? [];
+        if (activeTab === "projects") setProjects(items as Project[]);
+        else if (activeTab === "contacts")
+          setContacts(items as ContactMessage[]);
+        else if (activeTab === "quotes") setQuotes(items as QuoteRequest[]);
+        else setNewsItems(items as NewsItem[]);
+      } catch (error) {
+        if (!cancelled) {
+          toast({
+            variant: "destructive",
+            title: "Erreur de chargement",
+            description:
+              error instanceof Error ? error.message : "Une erreur est survenue",
+          });
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, page, pageSize, refreshToken, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      if (activeTab === "projects") fetchProjects();
-      else if (activeTab === "contacts") fetchContacts();
-      else if (activeTab === "quotes") fetchQuotes();
-      else if (activeTab === "news") fetchNews();
-    }
-  }, [isAuthenticated, activeTab]);
+    setPage(1);
+  }, [activeTab]);
 
-  const checkAuth = () => {
-    const token = document.cookie.includes("admin_session");
-    if (!token) {
-      router.push("/admin");
-    } else {
-      setIsAuthenticated(true);
-    }
+  const switchTab = (tab: Tab) => {
+    setActiveTab(tab);
+    setTotal(0);
   };
 
-  const handleLogout = () => {
-    document.cookie = "admin_session=; path=/; max-age=0";
-    router.push("/admin");
-  };
-
-  const fetchProjects = async () => {
-    setIsLoading(true);
+  const handleLogout = async () => {
     try {
-      const response = await fetch("/api/projects");
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
-      }
-    } catch (err) {
-      console.error("Error fetching projects:", err);
-    } finally {
-      setIsLoading(false);
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // on redirige même si l'appel échoue
     }
-  };
-
-  const fetchContacts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/admin/contacts");
-      if (response.ok) {
-        const data = await response.json();
-        setContacts(data);
-      }
-    } catch (err) {
-      console.error("Error fetching contacts:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchQuotes = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/admin/quotes");
-      if (response.ok) {
-        const data = await response.json();
-        setQuotes(data);
-      }
-    } catch (err) {
-      console.error("Error fetching quotes:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchNews = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/admin/news");
-      if (response.ok) {
-        const data = await response.json();
-        setNewsItems(data);
-      }
-    } catch (err) {
-      console.error("Error fetching news items:", err);
-    } finally {
-      setIsLoading(false);
-    }
+    router.replace("/admin");
+    router.refresh();
   };
 
   const handleUpdateQuoteStatus = async (id: string, status: string) => {
     try {
-      const response = await fetch(`/api/admin/quotes/${id}`, {
+      await api(`/api/admin/quotes/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-
-      if (response.ok) {
-        toast({
-          title: "Statut mis à jour",
-          description: "Le statut de la demande de devis a été mis à jour.",
-        });
-        fetchQuotes();
-      } else {
-        throw new Error("Failed to update quote status");
-      }
-    } catch (err) {
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la demande de devis a été mis à jour.",
+      });
+      refresh();
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Une erreur s'est produite",
+        description:
+          error instanceof Error ? error.message : "Une erreur s'est produite",
       });
     }
   };
 
   const resetNewsForm = () => {
-    setNewsFormData({
-      title: "",
-      description: "",
-      published: true,
-    });
+    setNewsFormData({ title: "", description: "", published: true });
     setEditingNews(null);
   };
 
   const handleSubmitNews = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isEdit = !!editingNews;
+    const isEdit = Boolean(editingNews);
     const url = isEdit ? `/api/news/${editingNews?.id}` : "/api/news";
     const method = isEdit ? "PUT" : "POST";
 
     try {
-      const response = await fetch(url, {
+      await api(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newsFormData),
       });
 
-      if (response.ok) {
-        toast({
-          title: isEdit ? "Actualité modifiée" : "Actualité créée",
-          description: isEdit
-            ? "L'actualité a été mise à jour avec succès"
-            : "L'actualité a été créée avec succès",
-        });
-        await fetchNews();
-        resetNewsForm();
-        setIsNewsDialogOpen(false);
-      } else {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Erreur lors de l'enregistrement de l'actualité");
-      }
-    } catch (err) {
+      toast({
+        title: isEdit ? "Actualité modifiée" : "Actualité créée",
+        description: isEdit
+          ? "L'actualité a été mise à jour avec succès"
+          : "L'actualité a été créée avec succès",
+      });
+      resetNewsForm();
+      setIsNewsDialogOpen(false);
+      refresh();
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Une erreur s'est produite",
+        description:
+          error instanceof Error ? error.message : "Une erreur s'est produite",
       });
     }
   };
@@ -284,33 +297,27 @@ export default function AdminDashboardPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette actualité ?")) return;
 
     try {
-      const response = await fetch(`/api/news/${id}`, {
-        method: "DELETE",
+      await api(`/api/news/${id}`, { method: "DELETE" });
+      toast({
+        title: "Actualité supprimée",
+        description: "L'actualité a été supprimée avec succès",
       });
-
-      if (response.ok) {
-        toast({
-          title: "Actualité supprimée",
-          description: "L'actualité a été supprimée avec succès",
-        });
-        fetchNews();
-      } else {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Erreur lors de la suppression de l'actualité");
-      }
-    } catch (err) {
+      refresh();
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Une erreur s'est produite",
+        description:
+          error instanceof Error ? error.message : "Une erreur s'est produite",
       });
     }
   };
 
   const handleSubmitProject = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const projectId = editingProject?.id;
-    if (isEditing && !projectId) {
+    if (editingProject && !projectId) {
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -319,33 +326,31 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    const url = isEditing ? `/api/projects/${projectId}` : "/api/projects";
-    const method = isEditing ? "PUT" : "POST";
-
     try {
-      const response = await fetch(url, {
+      const url = editingProject ? `/api/projects/${projectId}` : "/api/projects";
+      const method = editingProject ? "PUT" : "POST";
+
+      await api(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        toast({
-          title: isEditing ? "Projet modifié" : "Projet créé",
-          description: isEditing ? "Le projet a été modifié avec succès" : "Le projet a été créé avec succès",
-        });
-        fetchProjects();
-        resetForm();
-        setIsEditing(false);
-        setIsProjectDialogOpen(false);
-      }
-    } catch (err) {
+      toast({
+        title: editingProject ? "Projet modifié" : "Projet créé",
+        description: editingProject
+          ? "Le projet a été modifié avec succès"
+          : "Le projet a été créé avec succès",
+      });
+      resetForm();
+      setIsProjectDialogOpen(false);
+      refresh();
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Une erreur s'est produite",
+        description:
+          error instanceof Error ? error.message : "Une erreur s'est produite",
       });
     }
   };
@@ -361,7 +366,6 @@ export default function AdminDashboardPage() {
       image: project.image,
       published: project.published,
     });
-    setIsEditing(true);
     setIsProjectDialogOpen(true);
   };
 
@@ -369,22 +373,18 @@ export default function AdminDashboardPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) return;
 
     try {
-      const response = await fetch(`/api/projects/${id}`, {
-        method: "DELETE",
+      await api(`/api/projects/${id}`, { method: "DELETE" });
+      toast({
+        title: "Projet supprimé",
+        description: "Le projet a été supprimé avec succès",
       });
-
-      if (response.ok) {
-        toast({
-          title: "Projet supprimé",
-          description: "Le projet a été supprimé avec succès",
-        });
-        fetchProjects();
-      }
-    } catch (err) {
+      refresh();
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Une erreur s'est produite",
+        description:
+          error instanceof Error ? error.message : "Une erreur s'est produite",
       });
     }
   };
@@ -399,7 +399,6 @@ export default function AdminDashboardPage() {
       image: "",
       published: true,
     });
-    setIsEditing(false);
     setEditingProject(null);
   };
 
@@ -414,9 +413,7 @@ export default function AdminDashboardPage() {
         reader.onload = () => {
           const result = reader.result;
           if (typeof result === "string") {
-            // result is base64 with prefix "data:...;base64,"
-            const base64 = result.split(",")[1] ?? "";
-            resolve(base64);
+            resolve(result.split(",")[1] ?? "");
           } else {
             reject(new Error("Format de fichier invalide"));
           }
@@ -424,40 +421,60 @@ export default function AdminDashboardPage() {
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch("/api/upload-image", {
+      const data = await api("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileData,
-        }),
+        body: JSON.stringify({ fileName: file.name, fileData, kind: "image" }),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Erreur lors du téléversement");
-      }
 
       setFormData((prev) => ({ ...prev, image: data.url }));
       toast({
         title: "Image importée",
-        description: "L'image a été enregistrée localement et liée au projet.",
+        description: "L'image a été téléversée et liée au projet.",
       });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Impossible de téléverser l'image",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Impossible de téléverser l'image",
       });
     } finally {
       setIsUploadingImage(false);
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const renderPagination = () => (
+    <div className="flex items-center justify-between pt-4">
+      <p className="text-sm text-muted-foreground">
+        Page {page} sur {totalPages} — {total} élément{total > 1 ? "s" : ""}
+      </p>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page <= 1 || isLoading}
+          onClick={() => setPage((value) => Math.max(1, value - 1))}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Précédent
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page >= totalPages || isLoading}
+          onClick={() => setPage((value) => value + 1)}
+        >
+          Suivant
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -466,7 +483,9 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div>
             <h1 className="text-2xl font-bold">Administration</h1>
-            <p className="text-sm text-muted-foreground">Tableau de bord SmartData</p>
+            <p className="text-sm text-muted-foreground">
+              Tableau de bord SmartData
+            </p>
           </div>
           <Button variant="outline" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
@@ -477,31 +496,31 @@ export default function AdminDashboardPage() {
 
       {/* Navigation Tabs */}
       <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6">
           <Button
             variant={activeTab === "projects" ? "default" : "outline"}
-            onClick={() => setActiveTab("projects")}
+            onClick={() => switchTab("projects")}
           >
             <Package className="w-4 h-4 mr-2" />
             Projets
           </Button>
           <Button
             variant={activeTab === "contacts" ? "default" : "outline"}
-            onClick={() => setActiveTab("contacts")}
+            onClick={() => switchTab("contacts")}
           >
             <MessageSquare className="w-4 h-4 mr-2" />
             Messages
           </Button>
           <Button
             variant={activeTab === "quotes" ? "default" : "outline"}
-            onClick={() => setActiveTab("quotes")}
+            onClick={() => switchTab("quotes")}
           >
             <FileText className="w-4 h-4 mr-2" />
             Devis
           </Button>
           <Button
             variant={activeTab === "news" ? "default" : "outline"}
-            onClick={() => setActiveTab("news")}
+            onClick={() => switchTab("news")}
           >
             <FileText className="w-4 h-4 mr-2" />
             Actualités
@@ -533,7 +552,9 @@ export default function AdminDashboardPage() {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>{isEditing ? "Modifier le projet" : "Nouveau projet"}</DialogTitle>
+                    <DialogTitle>
+                      {editingProject ? "Modifier le projet" : "Nouveau projet"}
+                    </DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSubmitProject} className="space-y-4">
                     <div>
@@ -541,8 +562,11 @@ export default function AdminDashboardPage() {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                         required
+                        maxLength={191}
                       />
                     </div>
                     <div>
@@ -551,8 +575,11 @@ export default function AdminDashboardPage() {
                         <Input
                           id="image"
                           value={formData.image}
-                          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, image: e.target.value })
+                          }
                           required
+                          maxLength={191}
                           placeholder="URL de l'image ou chemin /upload/mon-image.jpg"
                         />
                         <div className="flex items-center gap-3">
@@ -560,7 +587,9 @@ export default function AdminDashboardPage() {
                             id="imageFile"
                             type="file"
                             accept="image/*"
-                            onChange={(e) => handleLocalImageUpload(e.target.files?.[0] ?? null)}
+                            onChange={(e) =>
+                              handleLocalImageUpload(e.target.files?.[0] ?? null)
+                            }
                           />
                           {isUploadingImage && (
                             <span className="text-xs text-muted-foreground">
@@ -570,7 +599,10 @@ export default function AdminDashboardPage() {
                         </div>
                         {formData.image && (
                           <p className="text-xs text-muted-foreground">
-                            Image actuelle : <span className="underline break-all">{formData.image}</span>
+                            Image actuelle :{" "}
+                            <span className="underline break-all">
+                              {formData.image}
+                            </span>
                           </p>
                         )}
                       </div>
@@ -580,7 +612,9 @@ export default function AdminDashboardPage() {
                       <Textarea
                         id="objective"
                         value={formData.objective}
-                        onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, objective: e.target.value })
+                        }
                         required
                         rows={3}
                       />
@@ -590,7 +624,12 @@ export default function AdminDashboardPage() {
                       <Textarea
                         id="methodology"
                         value={formData.methodology}
-                        onChange={(e) => setFormData({ ...formData, methodology: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            methodology: e.target.value,
+                          })
+                        }
                         required
                         rows={4}
                       />
@@ -600,17 +639,23 @@ export default function AdminDashboardPage() {
                       <Textarea
                         id="results"
                         value={formData.results}
-                        onChange={(e) => setFormData({ ...formData, results: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, results: e.target.value })
+                        }
                         required
                         rows={4}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="testimonial">Témoignage (facultatif)</Label>
+                      <Label htmlFor="testimonial">
+                        Témoignage (facultatif)
+                      </Label>
                       <Textarea
                         id="testimonial"
                         value={formData.testimonial}
-                        onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, testimonial: e.target.value })
+                        }
                         rows={3}
                       />
                     </div>
@@ -618,13 +663,15 @@ export default function AdminDashboardPage() {
                       <Switch
                         id="published"
                         checked={formData.published}
-                        onCheckedChange={(checked: boolean) => setFormData({ ...formData, published: checked })}
+                        onCheckedChange={(checked: boolean) =>
+                          setFormData({ ...formData, published: checked })
+                        }
                       />
                       <Label htmlFor="published">Publié</Label>
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">
-                        {isEditing ? "Modifier" : "Créer"}
+                        {editingProject ? "Modifier" : "Créer"}
                       </Button>
                       <Button
                         type="button"
@@ -643,7 +690,9 @@ export default function AdminDashboardPage() {
             </div>
 
             {isLoading ? (
-              <div className="py-12 text-center text-muted-foreground">Chargement...</div>
+              <div className="py-12 text-center text-muted-foreground">
+                Chargement...
+              </div>
             ) : projects.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
@@ -665,13 +714,23 @@ export default function AdminDashboardPage() {
                               <EyeOff className="w-4 h-4 text-muted-foreground" />
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{project.objective}</p>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {project.objective}
+                          </p>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleEditProject(project)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditProject(project)}
+                          >
                             <Edit2 className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDeleteProject(project.id)}>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -679,6 +738,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                   </Card>
                 ))}
+                {renderPagination()}
               </div>
             )}
           </div>
@@ -687,9 +747,13 @@ export default function AdminDashboardPage() {
         {/* Contacts Tab */}
         {activeTab === "contacts" && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Messages de contact ({contacts.length})</h2>
+            <h2 className="text-xl font-semibold">
+              Messages de contact ({total})
+            </h2>
             {isLoading ? (
-              <div className="py-12 text-center text-muted-foreground">Chargement...</div>
+              <div className="py-12 text-center text-muted-foreground">
+                Chargement...
+              </div>
             ) : contacts.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
@@ -719,6 +783,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                   </Card>
                 ))}
+                {renderPagination()}
               </div>
             )}
           </div>
@@ -727,9 +792,13 @@ export default function AdminDashboardPage() {
         {/* Quotes Tab */}
         {activeTab === "quotes" && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Demandes de devis ({quotes.length})</h2>
+            <h2 className="text-xl font-semibold">
+              Demandes de devis ({total})
+            </h2>
             {isLoading ? (
-              <div className="py-12 text-center text-muted-foreground">Chargement...</div>
+              <div className="py-12 text-center text-muted-foreground">
+                Chargement...
+              </div>
             ) : quotes.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
@@ -756,10 +825,10 @@ export default function AdminDashboardPage() {
                               quote.status === "done"
                                 ? "default"
                                 : quote.status === "in_progress"
-                                ? "secondary"
-                                : quote.status === "cancelled"
-                                ? "destructive"
-                                : "outline"
+                                  ? "secondary"
+                                  : quote.status === "cancelled"
+                                    ? "destructive"
+                                    : "outline"
                             }
                           >
                             {quote.status === "pending" && "En attente"}
@@ -778,7 +847,9 @@ export default function AdminDashboardPage() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="pending">En attente</SelectItem>
-                              <SelectItem value="in_progress">En cours</SelectItem>
+                              <SelectItem value="in_progress">
+                                En cours
+                              </SelectItem>
                               <SelectItem value="done">Terminé</SelectItem>
                               <SelectItem value="cancelled">Annulé</SelectItem>
                             </SelectContent>
@@ -790,9 +861,14 @@ export default function AdminDashboardPage() {
                         <p>{quote.phone}</p>
                         <p>{quote.serviceType}</p>
                         {quote.attachment && (
-                          <p className="italic">
-                            Pièce jointe fournie (voir base de données)
-                          </p>
+                          <a
+                            href={quote.attachment}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="italic text-primary hover:underline"
+                          >
+                            Voir la pièce jointe
+                          </a>
                         )}
                       </div>
                       <p className="mt-2 text-sm whitespace-pre-wrap">
@@ -801,6 +877,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                   </Card>
                 ))}
+                {renderPagination()}
               </div>
             )}
           </div>
@@ -809,13 +886,10 @@ export default function AdminDashboardPage() {
         {/* News Tab */}
         {activeTab === "news" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">Actualités (flash news)</h2>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => fetchNews()}
-                >
+                <Button variant="outline" onClick={refresh}>
                   Actualiser
                 </Button>
                 <Button
@@ -854,6 +928,7 @@ export default function AdminDashboardPage() {
                         setNewsFormData({ ...newsFormData, title: e.target.value })
                       }
                       required
+                      maxLength={191}
                     />
                   </div>
                   <div>
@@ -900,11 +975,14 @@ export default function AdminDashboardPage() {
               </DialogContent>
             </Dialog>
             {isLoading ? (
-              <div className="py-12 text-center text-muted-foreground">Chargement...</div>
+              <div className="py-12 text-center text-muted-foreground">
+                Chargement...
+              </div>
             ) : newsItems.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
-                  Aucune actualité configurée pour le moment. La barre d&apos;actualités utilisera les messages par défaut.
+                  Aucune actualité configurée pour le moment. La barre
+                  d&apos;actualités utilisera les messages par défaut.
                 </CardContent>
               </Card>
             ) : (
@@ -945,6 +1023,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                   </Card>
                 ))}
+                {renderPagination()}
               </div>
             )}
           </div>

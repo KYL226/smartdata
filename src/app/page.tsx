@@ -66,16 +66,24 @@ export default function Home() {
           </p>
           <div className="flex-1 overflow-hidden">
             {displayedNews.length > 0 && (
-              <div className="flex gap-8 animate-marquee whitespace-nowrap">
-                {[...displayedNews, ...displayedNews].map((news, index) => (
-                  <button
-                    key={(news.id ?? "news") + "-" + index}
-                    type="button"
-                    className="text-xs sm:text-sm hover:text-background/90 underline-offset-2 hover:underline"
-                    onClick={() => setActiveNewsIndex(index % displayedNews.length)}
+              <div className="flex w-max animate-marquee whitespace-nowrap">
+                {[0, 1].map((copy) => (
+                  <div
+                    key={`news-copy-${copy}`}
+                    className="flex shrink-0 gap-8 pr-8"
+                    aria-hidden={copy === 1}
                   >
-                    {news.title}
-                  </button>
+                    {displayedNews.map((news, index) => (
+                      <button
+                        key={(news.id ?? "news") + "-" + index}
+                        type="button"
+                        className="text-xs sm:text-sm hover:text-background/90 underline-offset-2 hover:underline"
+                        onClick={() => setActiveNewsIndex(index)}
+                      >
+                        {news.title}
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}
@@ -126,11 +134,11 @@ export default function Home() {
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="text-black border-white hover:bg-white/10"
+                    className="text-white border-white bg-transparent hover:bg-white/10 hover:text-white"
                     onClick={() => setIsVideoOpen(true)}
                   >
-                    <div className="flex items-center justify-center w-6 h-6 mr-2 border-2 border-black rounded-full">
-                      <Play className="w-3 h-3 fill-black" />
+                    <div className="flex items-center justify-center w-6 h-6 mr-2 border-2 border-white rounded-full">
+                      <Play className="w-3 h-3 fill-white" />
                     </div>
                     Voir notre approche
                   </Button>
@@ -261,10 +269,12 @@ export default function Home() {
             Contactez-nous des aujourd&apos;hui pour discuter de votre projet et découvrir comment notre expertise statistique peut vous aider à atteindre vos objectifs.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="text-white bg-secondary hover:bg-secondary/90">
-              Demander un devis gratuit
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+                  <Button size="lg" className="text-white bg-secondary hover:bg-secondary/90" asChild>
+                    <Link href="/devis">
+                      Demander un devis gratuit
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Link>
+                  </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href="/contact">
                 Nous contacter
@@ -322,7 +332,7 @@ export default function Home() {
       )}
 
       {/* News Modal */}
-      {activeNewsIndex !== null && (
+      {activeNewsIndex !== null && displayedNews[activeNewsIndex] && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           onClick={() => setActiveNewsIndex(null)}
@@ -343,10 +353,10 @@ export default function Home() {
             </div>
             <div className="p-6 space-y-3">
               <h4 className="text-lg font-semibold">
-                {newsItems[activeNewsIndex].title}
+                {displayedNews[activeNewsIndex].title}
               </h4>
               <p className="text-sm text-muted-foreground">
-                {newsItems[activeNewsIndex].description}
+                {displayedNews[activeNewsIndex].description}
               </p>
             </div>
             <div className="flex justify-end p-4">

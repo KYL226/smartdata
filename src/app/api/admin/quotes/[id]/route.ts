@@ -1,25 +1,33 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth";
+import { quoteStatusSchema, validateBody } from "@/lib/validation";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { status } = body as { status?: string };
 
-    if (!status) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { error: "Missing status field" },
+        { error: "Corps de requête invalide" },
         { status: 400 }
       );
     }
 
+    const parsed = validateBody(quoteStatusSchema, body);
+    if (!parsed.ok) return parsed.response;
+
     const updated = await db.quoteRequest.update({
       where: { id },
-      data: { status },
+      data: { status: parsed.data.status },
     });
 
     return NextResponse.json(updated);
@@ -36,11 +44,11 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
-    await db.quoteRequest.delete({
-      where: { id },
-    });
+    await db.quoteRequest.delete({ where: { id } });
 
     return NextResponse.json({ message: "Quote request deleted successfully" });
   } catch (error) {
@@ -51,4 +59,3 @@ export async function DELETE(
     );
   }
 }
-

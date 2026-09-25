@@ -127,18 +127,18 @@ export default function Footer() {
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground">+225 07 00 00 00 00</span>
+                <span className="text-sm text-muted-foreground">+225 07 01 46 88 21</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <a href="mailto:contact@smartdata.ci" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
+                <a href="mailto:smartdataconsulting@gmail.com" className="text-sm transition-colors text-muted-foreground hover:text-foreground">
                   smartdataconsulting@gmail.com
                 </a>
               </li>
             </ul>
             <div className="mt-4">
               <a
-                href="https://wa.me/2250000000000"
+                href="https://wa.me/2250701468821"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 text-sm font-medium text-green-600 transition-colors hover:text-green-700"

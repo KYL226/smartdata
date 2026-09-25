@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth";
+import { newsSchema, validateBody } from "@/lib/validation";
 
 export async function GET() {
   try {
@@ -10,6 +12,7 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
+      take: 50,
     });
 
     return NextResponse.json(items);
@@ -23,29 +26,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { title, description, published } = body as {
-      title?: string;
-      description?: string;
-      published?: boolean;
-    };
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
+  }
 
-    if (!title || !description) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+  const parsed = validateBody(newsSchema, body);
+  if (!parsed.ok) return parsed.response;
 
-    const item = await db.newsItem.create({
-      data: {
-        title,
-        description,
-        published: published ?? true,
-      },
-    });
-
+  try {
+    const item = await db.newsItem.create({ data: parsed.data });
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
     console.error("Error creating news item:", error);
@@ -55,4 +49,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

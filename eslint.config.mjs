@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Dossier d'exemples/scripts non applicatif (héberge ses propres artefacts) :
+    "skills/**",
+    // Fichiers AppleDouble générés en archiving sur macOS :
+    "**/__MACOSX/**",
+    "node_modules/**",
+    // Artefacts locaux :
+    "db/**",
   ]),
 ]);
 

@@ -1,19 +1,50 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendMail } from "@/lib/mail";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { quoteSchema, validateBody } from "@/lib/validation";
+
+const QUOTE_WINDOW_MS = 60 * 60 * 1000;
+const QUOTE_MAX_REQUESTS = 10;
 
 export async function POST(request: Request) {
+  const limited = rateLimit(
+    `quote:${clientIp(request)}`,
+    QUOTE_MAX_REQUESTS,
+    QUOTE_WINDOW_MS
+  );
+
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Trop de demandes envoyées. Réessayez plus tard." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSeconds) },
+      }
+    );
+  }
+
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { firstName, lastName, email, phone, serviceType, description, attachment } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
+  }
 
-    if (!firstName || !lastName || !email || !phone || !serviceType || !description) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+  const parsed = validateBody(quoteSchema, body);
+  if (!parsed.ok) return parsed.response;
 
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    serviceType,
+    description,
+    attachment,
+  } = parsed.data;
+
+  try {
     const quoteRequest = await db.quoteRequest.create({
       data: {
         firstName,
@@ -22,7 +53,7 @@ export async function POST(request: Request) {
         phone,
         serviceType,
         description,
-        attachment: attachment || null,
+        attachment: attachment ?? null,
       },
     });
 
@@ -40,7 +71,7 @@ export async function POST(request: Request) {
           "Description du besoin :",
           description,
           "",
-          `Pièce jointe : ${attachment ? "oui (stockée en base / à traiter)" : "non"}`,
+          `Pièce jointe : ${attachment ?? "non"}`,
         ].join("\n"),
       });
     } catch (mailError) {

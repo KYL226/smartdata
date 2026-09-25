@@ -1,13 +1,17 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+  prisma: PrismaClient | undefined;
+};
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const db =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: ['query'],
-  })
+    // Les requêtes SQL ne sont journalisées qu'en développement :
+    // en production elles dégradent les performances et exposent les données.
+    log: isProduction ? ["error"] : ["query", "error"],
+  });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+if (!isProduction) globalForPrisma.prisma = db;

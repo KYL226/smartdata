@@ -1,41 +1,33 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth";
+import { newsUpdateSchema, validateBody } from "@/lib/validation";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
-    const body = await request.json();
-    const { title, description, published } = body as {
-      title?: string;
-      description?: string;
-      published?: boolean;
-    };
-
-    if (!title || !description) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Corps de requête invalide" },
         { status: 400 }
       );
     }
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing news item id" },
-        { status: 400 }
-      );
-    }
+    const parsed = validateBody(newsUpdateSchema, body);
+    if (!parsed.ok) return parsed.response;
 
     const item = await db.newsItem.update({
       where: { id },
-      data: {
-        title,
-        description,
-        published: published ?? true,
-      },
+      data: parsed.data,
     });
 
     return NextResponse.json(item);
@@ -52,19 +44,12 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!requireAdmin(request)) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Missing news item id" },
-        { status: 400 }
-      );
-    }
-
-    await db.newsItem.delete({
-      where: { id },
-    });
+    await db.newsItem.delete({ where: { id } });
 
     return NextResponse.json({ message: "News item deleted successfully" });
   } catch (error) {
@@ -75,4 +60,3 @@ export async function DELETE(
     );
   }
 }
-
